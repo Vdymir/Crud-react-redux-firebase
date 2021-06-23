@@ -1,1 +1,1 @@
-### Crud con autenticacion hecho con React-Redux & firebase
+### Crud con autenticacion hecho en React-Redux & firebase
