@@ -1,5 +1,6 @@
 import Swal from "sweetalert2";
 import { db } from "../firebase/firebase-config";
+import { filesUpload } from "../helpers/filesUpload";
 import { types } from "../types/types";
 
 
@@ -14,9 +15,17 @@ export const startAddNotes = () => {
         }
         const docRef = await db.collection(`${uid}/journal/notes`).add( newNote );
         dispatch(noteActive(docRef.id, newNote))
+        dispatch(noteAddNew(docRef.id, newNote))
     }
 
 }
+export const noteAddNew = (id, nota) => ({
+    type: types.notesAddNew,
+    payload: {
+        id,
+        ...nota
+    }
+})
 
 export const noteActive = (id, nota) => ({
     type: types.notesActive,
@@ -52,4 +61,32 @@ export const noteUpdate = (id, note) => ({
         id,
         note: {id, ...note}
     }
+})
+
+export const startUploading = file => {
+    return async (dispatch, getState) => {
+        const {active} = getState().notes;
+        
+        const fileUrl = await filesUpload(file);
+        active.url = fileUrl;
+        dispatch(startSaveNote(active))
+    }
+}
+
+export const startDeleteNote = (id) => {
+    return async (dispatch, getState) => {
+        const {uid} = getState().auth;
+        await db.doc(`${uid}/journal/notes/${id}`).delete();
+
+        dispatch(noteDelete(id))
+    }
+}
+
+export const noteDelete = (id) => ({
+    type: types.noteDelete,
+    payload: id
+})
+
+export const noteLogout = ()=> ({
+    type: types.noteLogoutCleaning,
 })
